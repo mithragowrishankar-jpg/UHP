@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unified Health Passport — The Lost Health Files</title>
+<style>
+:root{--navy:#08172b;--panel:#102640;--panel2:#15324e;--cyan:#65d9e8;--blue:#8ebcff;--white:#f3f8ff;--muted:#b6c8dc;--green:#74e0b1;--red:#ff9c9c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0%,#173d5b 0,#08172b 45%,#050d1b 100%);color:var(--white);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.wrap{max-width:1000px;margin:auto;padding:24px 18px 50px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{letter-spacing:.14em;font-size:.78rem;color:var(--cyan);font-weight:800}.timer{border:1px solid #39718d;border-radius:999px;padding:8px 14px;color:var(--cyan);font-weight:800;font-variant-numeric:tabular-nums}
+h1{font-size:clamp(2rem,5vw,3.7rem);line-height:1.03;margin:35px 0 12px;max-width:780px}h1 span{color:var(--cyan)}.intro{max-width:700px;color:var(--muted);font-size:1.08rem}
+.progress{display:flex;gap:7px;margin:26px 0}.dot{height:7px;flex:1;border-radius:20px;background:#29435c}.dot.done{background:var(--green)}.dot.current{background:var(--cyan);box-shadow:0 0 12px #65d9e877}
+.card{background:linear-gradient(145deg,#102640,#0b1c31);border:1px solid #284763;border-radius:22px;padding:clamp(20px,4vw,34px);box-shadow:0 18px 50px #0005}
+.kicker{color:var(--cyan);font-size:.78rem;letter-spacing:.15em;font-weight:800;text-transform:uppercase}.room-title{font-size:clamp(1.5rem,3vw,2.2rem);margin:8px 0}.muted{color:var(--muted)}.challenge{background:#0a1b2e;border:1px solid #294763;border-radius:14px;padding:17px;margin:20px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.tile{background:#15324e;border:1px solid #31516e;border-radius:13px;padding:14px;text-align:left;color:var(--white);min-height:94px}.tile strong{display:block;color:var(--cyan);font-size:1.05rem;margin-bottom:4px}
+input{width:100%;max-width:360px;background:#071526;border:1px solid #45627d;border-radius:10px;padding:13px 14px;color:white;font-size:1rem;outline:none}input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #65d9e822}
+button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;font-size:1rem;cursor:pointer;background:var(--cyan);color:#071727;margin:8px 8px 0 0}button.secondary{background:#24445f;color:var(--white);border:1px solid #45627d}button:focus-visible{outline:3px solid white;outline-offset:3px}.feedback{min-height:28px;margin:12px 0 0;font-weight:700}.good{color:var(--green)}.bad{color:var(--red)}.room-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:22px}.small{font-size:.88rem;color:var(--muted)}.hidden{display:none!important}.vault{text-align:center;padding:28px 8px}.vault .symbol{font-size:4rem}.vault h2{font-size:2.4rem;color:var(--green);margin:8px}.note{border-left:3px solid var(--cyan);padding:10px 14px;background:#10263b;color:var(--muted);margin-top:20px;font-size:.9rem}
+footer{text-align:center;color:#7892aa;font-size:.8rem;margin-top:25px}
+@media(max-width:550px){.wrap{padding:18px 12px}.card{border-radius:16px}.room-footer{align-items:stretch}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand">UHP // HEALTH RECORDS CONTROL CENTRE</div><div class="timer" id="timer">15:00 LEFT</div></div>
+  <h1>THE LOST <span>HEALTH FILES</span></h1>
+  <p class="intro">The health information system has become disconnected. Solve five challenges, restore the demo database and unlock the Unified Health Passport.</p>
+  <div class="progress" id="progress" aria-label="Game progress"><div class="dot current"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <main class="card" id="game" aria-live="polite"></main>
+  <div class="note"><strong>Demo safety:</strong> This game uses entirely fictional examples. Never enter real medical details or personal health information.</div>
+  <footer>UNIFIED HEALTH PASSPORT · ONE PLACE. ONE PASSPORT. BETTER ORGANISATION.</footer>
+</div>
+<script>
+const rooms = [
+{tag:"CHALLENGE 01 / RECORDS",title:"The missing medical records",desc:"Four fictional files have been mixed up. Which category should contain a blood test result?",choices:["Appointment calendar","Medical records","Supplement log","Cycle tracker"],answer:1,explain:"Correct! A blood test result belongs with medical records."},
+{tag:"CHALLENGE 02 / APPOINTMENTS",title:"The appointment mystery",desc:"Put these fictional appointments in date order. Which one happens FIRST?",choices:["18 August — Dentist","04 August — Specialist","22 August — GP","11 August — Eye check"],answer:1,explain:"Correct! 04 August is the earliest date."},
+{tag:"CHALLENGE 03 / REMINDERS",title:"The forgotten checkup",desc:"A fictional reminder says: “Routine checkup due in September.” Which feature should store this reminder?",choices:["Preventive checkup reminders","Profile photo gallery","Shopping list","Travel diary"],answer:0,explain:"That's it! Due-date reminders help people keep track of preventive care."},
+{tag:"CHALLENGE 04 / CONNECT THE DATA",title:"The disconnected data",desc:"Which set best represents the information Unified Health Passport brings together?",choices:["Games, photos and music","Medical records, appointments, cycle and supplement logs","Weather, maps and news","Only a contact list"],answer:1,explain:"Exactly. The concept brings several kinds of health information together in one hub."}
+];
+let stage=0,seconds=900,interval=null,finished=false;
+const game=document.getElementById('game'),timer=document.getElementById('timer');
+function startTimer(){if(interval)return;interval=setInterval(()=>{if(finished)return;seconds=Math.max(0,seconds-1);timer.textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')} LEFT`;if(seconds===0){clearInterval(interval);timer.textContent="TIME UP";}},1000)}
+function updateProgress(){document.querySelectorAll('.dot').forEach((d,i)=>{d.className='dot'+(i<stage?' done':i===stage?' current':'')})}
+function renderRoom(){
+ updateProgress();
+ if(stage<4){let r=rooms[stage];game.innerHTML=`<div class="kicker">${r.tag}</div><h2 class="room-title">${r.title}</h2><p class="muted">${r.desc}</p><div class="grid">${r.choices.map((c,i)=>`<button class="tile" data-choice="${i}"><strong>OPTION ${String.fromCharCode(65+i)}</strong>${c}</button>`).join('')}</div><div class="feedback" id="feedback" role="status"></div><div class="room-footer"><span class="small">Room ${stage+1} of 5 · Choose one answer</span><button class="secondary" id="hint">Show hint</button></div>`;
+ game.querySelectorAll('[data-choice]').forEach(b=>b.addEventListener('click',()=>checkChoice(Number(b.dataset.choice),r)));
+ document.getElementById('hint').addEventListener('click',()=>{document.getElementById('feedback').textContent=stage===0?'Hint: Think about where test results are stored.':stage===1?'Hint: Compare the day numbers in August.':'Hint: Look for the option that matches the feature named in the question.';document.getElementById('feedback').className='feedback'});
+ }else{renderVault()}
+}
+function checkChoice(choice,r){let f=document.getElementById('feedback');if(choice===r.answer){f.textContent=r.explain;f.className='feedback good';game.querySelectorAll('[data-choice]').forEach(b=>b.disabled=true);let next=document.createElement('button');next.textContent='Unlock next room →';next.addEventListener('click',()=>{stage++;renderRoom()});f.after(next)}else{f.textContent='Not quite. Try another option, or use the hint.';f.className='feedback bad'}}
+function renderVault(){updateProgress();game.innerHTML=`<div class="kicker">CHALLENGE 05 / SECURITY VAULT</div><h2 class="room-title">The security vault</h2><p class="muted">Final challenge: Which principle is most important when handling personal health information?</p><div class="grid"><button class="tile" data-final="0"><strong>A</strong>Share everyone's records publicly</button><button class="tile" data-final="1"><strong>B</strong>Keep information private and only share it with permission</button><button class="tile" data-final="2"><strong>C</strong>Use the same easy password everywhere</button></div><div class="feedback" id="feedback" role="status"></div><div class="room-footer"><span class="small">Final room · One last answer</span></div>`;game.querySelectorAll('[data-final]').forEach(b=>b.addEventListener('click',()=>{let f=document.getElementById('feedback');if(b.dataset.final==='1'){finished=true;clearInterval(interval);timer.textContent='MISSION COMPLETE';f.textContent='Correct! Privacy and permission matter.';f.className='feedback good';setTimeout(showWin,700)}else{f.textContent='Try again. Think about privacy, consent and keeping information secure.';f.className='feedback bad'}}))}
+function showWin(){updateProgress();document.querySelectorAll('.dot').forEach(d=>d.className='dot done');game.innerHTML=`<div class="vault"><div class="symbol">🔓</div><div class="kicker">DATABASE RESTORED</div><h2>SYSTEM RESTORED!</h2><p class="muted">You solved all five challenges and reconnected the demo health information.</p><h2 style="color:var(--cyan);font-size:1.5rem">UNIFIED HEALTH PASSPORT</h2><p>ONE PLACE. ONE PASSPORT. BETTER ORGANISATION.</p><p class="good"><strong>MISSION COMPLETE</strong></p><button id="again">Play again</button></div>`;document.getElementById('again').addEventListener('click',()=>{stage=0;seconds=900;finished=false;clearInterval(interval);interval=null;timer.textContent='15:00 LEFT';renderRoom()})}
+renderRoom();startTimer();
+</script>
+</body>
+</html>
